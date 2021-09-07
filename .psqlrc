@@ -1,0 +1,67 @@
+\timing on
+\set PROMPT1 '(%n@%m:%>) %`date +%H:%M:%S` [%/] %x%# '
+\set PROMPT2 '    > '
+\pset pager off
+
+------------
+-- Shortcuts
+------------
+
+\echo 
+
+\echo '\t\\l\t\t-- List databases'
+\echo '\t\\dn\t\t-- List schemas'
+\echo '\t\\du\t\t-- List users'
+\echo '\t\\dt\t\t-- Describe tables in public schema'
+\echo '\t\\dt <s>.*\t-- Describe tables in schema <s>'
+\echo '\t\\dt *.*\t\t-- Describe tables in all schemas'
+\echo '\t\\d+ <t>\t\t-- Describe table <t> in detail'
+
+\echo
+
+\set sp 'show search_path;'
+\echo '\t:sp\t\t-- Search path'
+
+\set settings 'select name,setting,unit,context from pg_settings;'
+\echo '\t:settings\t-- Server settings'
+
+\set locks  'SELECT bl.pid AS blocked_pid, a.usename AS blocked_user, kl.pid AS blocking_pid, ka.usename AS blocking_user, a.query AS blocked_statement FROM pg_catalog.pg_locks bl JOIN pg_catalog.pg_stat_activity a ON bl.pid = a.pid JOIN pg_catalog.pg_locks kl JOIN pg_catalog.pg_stat_activity ka ON kl.pid = ka.pid ON bl.transactionid = kl.transactionid AND bl.pid != kl.pid WHERE NOT bl.granted;'
+\echo '\t:locks\t\t-- Lock info'
+
+\set conninfo 'select usename, count(*) from pg_stat_activity group by usename;'
+\echo '\t:conninfo\t-- Server connections'
+
+\set activity 'select datname, pid, usename, application_name,client_addr, client_hostname, client_port, query, state from pg_stat_activity;'
+\echo '\t:activity\t-- Server activity'
+
+\set tablesizes 'SELECT nspname || \'.\' || relname AS \"relation\", pg_size_pretty(pg_relation_size(C.oid)) AS "size" FROM pg_class C LEFT JOIN pg_namespace N ON (N.oid = C.relnamespace) WHERE nspname NOT IN (\'pg_catalog\', \'information_schema\') ORDER BY pg_relation_size(C.oid) DESC LIMIT 40;'
+\echo '\t:tablesizes\t-- Table sizes'
+
+\set uptime 'select now() - pg_postmaster_start_time() AS uptime;'
+\echo '\t:uptime\t\t-- Server uptime'
+
+\echo
+
+\echo '\t\\!\t\t-- Enter shell or run shell command'
+\echo '\t\\cd\t\t-- Change current directory'
+\set ls '\\! ls -lrth;'
+\echo '\t:ls\t\t-- List current directory'
+\set help '\\i `echo ${PSQLRC-"Environment variable PSQLRC must be set.   "}`'
+\echo '\t\\x auto\t\t-- Set expanded output display to auto. Additional params: on, off'
+\echo '\t:help\t\t-- Display this help screen'
+\echo '\t\\h\t\t-- Help with SQL commands'
+\echo '\t\\?\t\t-- Help with psql commands'
+
+\echo
+
+\echo 'Query examples:\n'
+\echo 'select reltuples::bigint as estimate from pg_class where relname=\'eight_hour\'; --row count estimate'
+\echo 'select pg_size_pretty( pg_database_size(\'census\') );'
+\echo 'select pg_size_pretty( pg_total_relation_size(\'tablename\') );'
+\echo 'select id,status,date,"localDir"||filename from etl.edw_download where status!=\'SUCCESS\';'
+\echo 'update etl.edw_download set status=\'FAILED\' where ...;'
+\echo 'select id,status,date,"localDir"||filename,error from etl.edw_download where "scriptPath" like \'%EPA%\';'
+\echo 'delete from etl.edw_download where "scriptPath" like \'%EPA%\';'
+\echo
+
+\x auto
