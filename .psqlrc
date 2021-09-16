@@ -20,19 +20,22 @@
 \echo
 
 \set sp 'show search_path;'
-\echo '\t:sp\t\t-- Search path'
+\echo '\t:sp\t\t-- Show search path'
 
 \set settings 'select name,setting,unit,context from pg_settings;'
 \echo '\t:settings\t-- Server settings'
 
-\set locks  'SELECT bl.pid AS blocked_pid, a.usename AS blocked_user, kl.pid AS blocking_pid, ka.usename AS blocking_user, a.query AS blocked_statement FROM pg_catalog.pg_locks bl JOIN pg_catalog.pg_stat_activity a ON bl.pid = a.pid JOIN pg_catalog.pg_locks kl JOIN pg_catalog.pg_stat_activity ka ON kl.pid = ka.pid ON bl.transactionid = kl.transactionid AND bl.pid != kl.pid WHERE NOT bl.granted;'
+\set connections 'select coalesce(usename, \'null\'), count(*), backend_type from pg_stat_activity group by backend_type, usename;'
+\echo '\t:connections\t-- Server connections'
+
+\set edwprocs 'SELECT pid, usename, state, application_name, query FROM pg_stat_activity WHERE datname = \'edw\' AND pid <> pg_backend_pid();'
+\echo '\t:edwprocs\t-- Current EDW processes'
+
+\set procs 'select * from pg_stat_activity;'
+\echo '\t:procs\t\t-- Server activity'
+
+\set locks 'SELECT bl.pid AS blocked_pid, a.usename AS blocked_user, kl.pid AS blocking_pid, ka.usename AS blocking_user, a.query AS blocked_statement FROM pg_catalog.pg_locks bl JOIN pg_catalog.pg_stat_activity a ON bl.pid = a.pid JOIN pg_catalog.pg_locks kl JOIN pg_catalog.pg_stat_activity ka ON kl.pid = ka.pid ON bl.transactionid = kl.transactionid AND bl.pid != kl.pid WHERE NOT bl.granted;'
 \echo '\t:locks\t\t-- Lock info'
-
-\set conninfo 'select usename, count(*) from pg_stat_activity group by usename;'
-\echo '\t:conninfo\t-- Server connections'
-
-\set activity 'select datname, pid, usename, application_name,client_addr, client_hostname, client_port, query, state from pg_stat_activity;'
-\echo '\t:activity\t-- Server activity'
 
 \set tablesizes 'SELECT nspname || \'.\' || relname AS \"relation\", pg_size_pretty(pg_relation_size(C.oid)) AS "size" FROM pg_class C LEFT JOIN pg_namespace N ON (N.oid = C.relnamespace) WHERE nspname NOT IN (\'pg_catalog\', \'information_schema\') ORDER BY pg_relation_size(C.oid) DESC LIMIT 40;'
 \echo '\t:tablesizes\t-- Table sizes'
@@ -55,13 +58,14 @@
 \echo
 
 \echo 'Query examples:\n'
-\echo 'select reltuples::bigint as estimate from pg_class where relname=\'eight_hour\'; --row count estimate'
+\echo 'select reltuples::bigint as estimate from pg_class where relname=\'eight_hour\'; -- fast row count estimate'
 \echo 'select pg_size_pretty( pg_database_size(\'census\') );'
 \echo 'select pg_size_pretty( pg_total_relation_size(\'tablename\') );'
 \echo 'select id,status,date,"localDir"||filename from etl.edw_download where status!=\'SUCCESS\';'
 \echo 'update etl.edw_download set status=\'FAILED\' where ...;'
-\echo 'select id,status,date,"localDir"||filename,error from etl.edw_download where "scriptPath" like \'%EPA%\';'
 \echo 'delete from etl.edw_download where "scriptPath" like \'%EPA%\';'
+\echo 'select pid, pg_cancel_backend(pid) from pg_stat_activity where datname = \'edw\' AND pid <> pg_backend_pid();'
+\echo 'Useful functions: pg_cancel_backend(pid), pg_terminate_backend(pid), clock_timestamp(); -- current time'
 \echo
 
 \x auto
