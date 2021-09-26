@@ -63,9 +63,10 @@
 \echo 'select pg_size_pretty( pg_total_relation_size(\'tablename\') );'
 \echo 'select id,status,date,"localDir"||filename from etl.edw_download where status!=\'SUCCESS\';'
 \echo 'update etl.edw_download set status=\'FAILED\' where ...;'
-\echo 'delete from etl.edw_download where "scriptPath" like \'%EPA%\';'
 \echo 'select pid, pg_cancel_backend(pid) from pg_stat_activity where datname = \'edw\' AND pid <> pg_backend_pid();'
-\echo 'Useful functions: pg_cancel_backend(pid), pg_terminate_backend(pid), clock_timestamp(); -- current time'
+\echo 'Useful functions: pg_cancel_backend(pid), pg_terminate_backend(pid), clock_timestamp() -- current time'
+\echo 'SELECT pg_cancel_backend(pg_stat_activity.pid) FROM pg_stat_activity'
+\echo '    WHERE pg_stat_activity.datname = 'edw' AND pid <> pg_backend_pid();'
 \echo
 
 \x auto
