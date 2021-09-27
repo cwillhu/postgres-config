@@ -67,6 +67,7 @@
 \echo 'Useful functions: pg_cancel_backend(pid), pg_terminate_backend(pid), clock_timestamp() -- current time'
 \echo 'SELECT pg_cancel_backend(pg_stat_activity.pid) FROM pg_stat_activity'
 \echo '    WHERE pg_stat_activity.datname = \'edw\' AND pid <> pg_backend_pid();'
+\echo 'SELECT column_name, data_type FROM information_schema.columns WHERE table_schema = \'public\' AND table_name = \'t\';'
 \echo
 
 \x auto
