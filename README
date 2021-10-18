@@ -5,5 +5,5 @@ Enable by adding the following line to .bashrc:
 
 export PSQLRC=/path/to/.psqlrc
 
-replacing '/path/to/.psqlrc' with the path to .psqlrc.
+replacing '/path/to/.psqlrc' with your path to .psqlrc.
 
